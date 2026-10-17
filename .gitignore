@@ -1,0 +1,8 @@
+﻿bin/
+obj/
+build/
+release/
+pending-*/
+build.log
+CODEX_HANDOFF.md
+AGENTS.md
