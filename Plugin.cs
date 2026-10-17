@@ -22,7 +22,7 @@ public sealed class Plugin : BasePlugin
 {
     public const string PluginId = "soybean_alien.forsworn.director";
     public const string PluginName = "Forsworn Director";
-    public const string PluginVersion = "0.2.0";
+    public const string PluginVersion = "1.0.0";
     private const string LegacyConfigName = "net.codex.forsworn.director.cfg";
 
     internal const int CurrencyReserve = 999_999;
@@ -329,6 +329,9 @@ public sealed class Plugin : BasePlugin
         // Clicks on the panel must not walk the party or pick combat targets underneath it.
         Patch(typeof(FreeRoamSystem), "MoveToWaypoint", prefix: nameof(BeforeWorldClick));
         Patch(typeof(CoreActionSystem), "HandleAbilityDecisionMade", prefix: nameof(BeforeAbilityDecision));
+        // On the act map, clicks would otherwise paint or erase map markings under the panel.
+        Patch(typeof(MapMarkerController), "BeginDraw", prefix: nameof(BeforeWorldClick));
+        Patch(typeof(MapMarkerController), "BeginErase", prefix: nameof(BeforeWorldClick));
     }
 
     public static bool BeforeCurrentUpgradeTokens(ref int __result)

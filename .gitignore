@@ -7,3 +7,6 @@ build.log
 CODEX_HANDOFF.md
 AGENTS.md
 .claude/mirror-backup.log
+.claude/
+dist/
+tools/DemoGif/frames/

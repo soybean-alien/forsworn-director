@@ -1,0 +1,95 @@
+<!doctype html>
+<!-- Forsworn Director by soybean_alien. Repo banner, rendered to docs/media/banner.png (2560x1280) and
+     docs/media/social-preview.png (1280x640) by tools/banner/render.ps1. shots/panel.png is a real in-game capture. -->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet" />
+<style>
+  :root { --gold: #ffd36b; --ink: #fff7e8; --grey: #c9bfd8; --dim: #8c80a3; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 2560px; height: 1280px; overflow: hidden; }
+  body { position: relative; color: var(--ink); -webkit-font-smoothing: antialiased; font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+    background:
+      radial-gradient(900px 700px at 78% 55%, rgba(255, 92, 168, 0.35), transparent 70%),
+      radial-gradient(900px 600px at 18% 18%, rgba(98, 76, 255, 0.45), transparent 70%),
+      radial-gradient(800px 600px at 30% 105%, rgba(255, 140, 40, 0.35), transparent 70%),
+      linear-gradient(135deg, #12052e 0%, #1d0a3f 45%, #2a0b2e 100%); }
+  .rays { position: absolute; inset: 0; opacity: 0.18;
+    background: repeating-conic-gradient(from 200deg at 78% 50%, rgba(255,255,255,0.35) 0deg 2deg, transparent 2deg 12deg);
+    -webkit-mask-image: radial-gradient(1100px 800px at 78% 50%, #000 0%, transparent 70%); }
+  .sparks { position: absolute; inset: 0;
+    background-image: radial-gradient(2px 2px at 10% 30%, #fff 50%, transparent 51%), radial-gradient(2px 2px at 44% 12%, #ffd36b 50%, transparent 51%),
+      radial-gradient(3px 3px at 62% 88%, #ff7ad9 50%, transparent 51%), radial-gradient(2px 2px at 92% 16%, #7af0ff 50%, transparent 51%),
+      radial-gradient(2px 2px at 30% 70%, #fff 50%, transparent 51%), radial-gradient(3px 3px at 52% 40%, #ffd36b 50%, transparent 51%); }
+
+  .left { position: absolute; left: 120px; top: 92px; width: 1300px; }
+  .warn { display: inline-flex; align-items: center; gap: 18px; padding: 14px 30px; border-radius: 999px; font-size: 34px; font-weight: 700;
+    letter-spacing: 0.08em; color: #1a0610; background: linear-gradient(90deg, #ffcf3f, #ff6a3d); box-shadow: 0 0 40px rgba(255, 110, 60, 0.55); }
+  .warn svg { width: 38px; height: 38px; }
+  h1 { margin-top: 40px; font-family: 'Cinzel', serif; font-weight: 900; font-size: 128px; line-height: 0.95; letter-spacing: 0.02em;
+    background: linear-gradient(180deg, #fff3c4 0%, #ffd36b 45%, #ff9a3c 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 28px rgba(255, 180, 70, 0.55)); }
+  .tag { margin-top: 26px; font-size: 64px; font-weight: 700; line-height: 1;
+    background: linear-gradient(90deg, #ff7ad9, #ffb03a 55%, #ffe56b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { margin-top: 22px; font-size: 34px; font-weight: 600; color: var(--grey); }
+
+  .grid { margin-top: 44px; display: grid; grid-template-columns: repeat(7, 162px); gap: 22px; }
+  .tile { height: 162px; border-radius: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04)); border: 2px solid var(--c);
+    box-shadow: 0 0 30px color-mix(in srgb, var(--c) 55%, transparent), inset 0 0 26px color-mix(in srgb, var(--c) 30%, transparent); }
+  .tile svg { width: 74px; height: 74px; fill: var(--c); filter: drop-shadow(0 0 10px var(--c)); }
+  .tile span { font-size: 24px; font-weight: 700; letter-spacing: 0.02em; text-align: center; line-height: 1; }
+
+  .right { position: absolute; right: 120px; top: 120px; width: 900px; height: 1060px; }
+  .glow { position: absolute; inset: 40px; border-radius: 40px; background: radial-gradient(closest-side, rgba(255, 200, 90, 0.5), transparent);
+    filter: blur(40px); }
+  .panel { position: absolute; left: 50%; top: 50%; width: 760px; transform: translate(-50%, -50%) rotate(2.5deg); border-radius: 26px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 3px rgba(255, 211, 107, 0.6), 0 0 60px rgba(255, 170, 60, 0.45);
+    clip-path: inset(5px round 22px); }
+
+  .foot { position: absolute; left: 120px; bottom: 54px; font-size: 28px; font-weight: 600; color: var(--dim); }
+  .foot b { color: var(--grey); }
+  .by { position: absolute; right: 150px; bottom: 70px; display: flex; align-items: center; gap: 22px; font-size: 30px; font-weight: 700; color: var(--ink);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.8); }
+  .by img { width: 190px; height: 190px; border-radius: 50%; box-shadow: 0 0 0 4px #ffd36b, 0 0 40px rgba(255, 190, 80, 0.8); }
+</style>
+</head>
+<body>
+  <div class="rays"></div>
+  <div class="sparks"></div>
+
+  <div class="left">
+    <div class="warn"><svg viewBox="0 0 24 24"><path fill="#1a0610" d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg>SINGLE PLAYER &nbsp;|&nbsp; OFFLINE ONLY</div>
+    <h1>Forsworn<br/>Director</h1>
+    <div class="tag">Bend every battle your way.</div>
+    <div class="sub">A free in-game cheat panel for Forsworn's solo campaign &middot; press F8</div>
+
+    <div class="grid">
+      <div class="tile" style="--c:#ffe14d"><svg viewBox="0 0 24 24"><path d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4zm-1.2 15.2-3.5-3.5 1.4-1.4 2.1 2.1 5-5 1.4 1.4-6.4 6.4z"/></svg><span>God Mode</span></div>
+      <div class="tile" style="--c:#ff4d6d"><svg viewBox="0 0 24 24"><path d="M12 21.4 10.6 20C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.6 11.5L12 21.4z"/></svg><span>Max Health</span></div>
+      <div class="tile" style="--c:#ff7a2f"><svg viewBox="0 0 24 24"><path d="M21 2 10.4 12.6l-1.8-1.8-1.4 1.4 1.8 1.8-3.6 3.6-1.4-1.4L2.6 17.6l3.8 3.8 1.4-1.4-1.4-1.4 3.6-3.6 1.8 1.8 1.4-1.4-1.8-1.8L22 3V2h-1z"/></svg><span>Damage</span></div>
+      <div class="tile" style="--c:#4dd2ff"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm0 3.2 5 1.9V11c0 3.6-2.2 7-5 8.2V5.2z"/></svg><span>Shield Gen</span></div>
+      <div class="tile" style="--c:#b07aff"><svg viewBox="0 0 24 24"><path d="M5 3h14l-1 6 2 2-3 10H7L4 11l2-2-1-6zm4 4v3h6V7H9z"/></svg><span>Armor</span></div>
+      <div class="tile" style="--c:#ff5ad1"><svg viewBox="0 0 24 24"><path d="M12 1l1.6 5.2L18 3l-1.6 5.2L22 8l-4.4 3.2L22 15l-5.6-.2L18 20l-4.4-3.2L12 23l-1.6-6.2L6 20l1.6-5.2L2 15l4.4-3.8L2 8l5.6.2L6 3l4.4 3.2L12 1zm0 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg><span>Thorns</span></div>
+      <div class="tile" style="--c:#7dff6a"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg><span>AP Gen</span></div>
+      <div class="tile" style="--c:#3dffb4"><svg viewBox="0 0 24 24"><path d="M7 3h5v9l7 3c1.2.5 2 1.7 2 3v3H3v-4l2-1V3h2zm-2 15v1h14v-1H5z"/></svg><span>Movement</span></div>
+      <div class="tile" style="--c:#ffcf3f"><svg viewBox="0 0 24 24"><path d="m12 2 2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.2 5.8 20.9l1.6-7L2 9.2l7.1-.6L12 2z"/></svg><span>Ult Gen</span></div>
+      <div class="tile" style="--c:#ffd36b"><svg viewBox="0 0 24 24"><path d="M12 4c-4.4 0-8 1.3-8 3v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7c0-1.7-3.6-3-8-3zm0 2c3.9 0 6 1.1 6 1s-2.1 1-6 1-6-.9-6-1 2.1-1 6-1z"/></svg><span>999,999 Gold</span></div>
+      <div class="tile" style="--c:#c77dff"><svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9l4-6zm1.2 2L5 8.5h3.6L10 5H7.2zm4.8 0-1.4 3.5h2.8L12 5zm2 0 1.4 3.5H19L16.8 5H14z"/></svg><span>Soul Shards</span></div>
+      <div class="tile" style="--c:#ff6a3d"><svg viewBox="0 0 24 24"><path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V6zm8 2v2h2V8h-2zm0 3v2h2v-2h-2zm0 3v2h2v-2h-2z"/></svg><span>Upgrade Tokens</span></div>
+      <div class="tile" style="--c:#4dff9a"><svg viewBox="0 0 24 24"><path d="M3 20h18v2H3v-2zM5 10h3v8H5v-8zm5-4h3v12h-3V6zm5-4h3v16h-3V2z"/></svg><span>XP x5000</span></div>
+      <div class="tile" style="--c:#7af0ff"><svg viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 0 8 8h-2a6 6 0 1 1-6-6V4zm1-2v8l6-4-6-4z"/></svg><span>Endless AP</span></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="glow"></div>
+    <img class="panel" src="shots/panel.png" alt="" />
+  </div>
+
+  <div class="foot"><b>Free &amp; open source</b> &middot; MIT &middot; BepInEx 6 IL2CPP &middot; Unofficial fan mod, not affiliated with Resummon Studios</div>
+  <div class="by">by soybean_alien<img src="soybean_alien-logo.png" alt="" /></div>
+</body>
+</html>
