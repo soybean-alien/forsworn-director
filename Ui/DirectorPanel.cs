@@ -16,7 +16,7 @@ namespace ForswornDirector.Ui;
 // Cormorant body text, dark slate with gold trim). Built lazily on first open.
 internal sealed class DirectorPanel : MonoBehaviour
 {
-    private const float Width = 620f;
+    private const float Width = 660f;
     private const float Pad = 28f;
     private const float Inner = Width - Pad * 2f;
     private const float HeaderHeight = 112f;
@@ -48,11 +48,20 @@ internal sealed class DirectorPanel : MonoBehaviour
 
     private static ClassSettings[] ClassPages => Plugin.Classes.Values.OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase).ToArray();
 
+    // True while the mouse is over the open panel, or a press that began on it hasn't finished.
+    // Read by the world-click patches; game scripts may run before this Update, so the value
+    // lags one frame, which is harmless because the pointer has to travel to leave the panel.
+    internal static bool PointerCaptured { get; private set; }
+
+    private bool _pressOnPanel;
+    private int _releasedFrame = -10;
+
     private void Update()
     {
         if (Input.GetKeyDown(Plugin.ToggleKey.Value))
             SetVisible(!_visible);
 
+        TrackPointer();
         if (!_visible || _panel == null)
             return;
 
@@ -169,7 +178,7 @@ internal sealed class DirectorPanel : MonoBehaviour
             var ring = Widgets.Image(tab, "Ring", Theme.PillRing, Theme.WithAlpha(Theme.Gold, 0.7f));
             ring.rectTransform.Fill();
             Widgets.Clickable(tab, () => ShowPage(page), 0.06f, Theme.Pill);
-            var label = Widgets.Text(tab, "Label", names[index].ToUpperInvariant(), Theme.Heading, 12.5f, Theme.TextDim, TextAlignmentOptions.Center, 1f);
+            var label = Widgets.Text(tab, "Label", names[index].ToUpperInvariant(), Theme.Heading, 12f, Theme.TextDim, TextAlignmentOptions.Center, 0.5f);
             label.rectTransform.Fill();
             var badge = Widgets.Image(tab, "Badge", Theme.Dot, Theme.Gold);
             badge.rectTransform.Place(width - 11f, 4f, 6f, 6f);
@@ -181,8 +190,8 @@ internal sealed class DirectorPanel : MonoBehaviour
     {
         _footer = Widgets.Rect("Footer", _panel).Place(0f, 0f, Width, FooterHeight);
         Widgets.Divider(_footer, Pad - 8f, 0f, Inner + 16f, 0.3f);
-        Widgets.Text(_footer, "Hint", $"{Plugin.ToggleKey.Value} to hide   ·   drag the title to move   ·   pauses itself in co-op",
-                Theme.BodyItalic, 16f, Theme.TextFaint, TextAlignmentOptions.Center)
+        Widgets.Text(_footer, "Hint", $"{Plugin.ToggleKey.Value} to hide   \u00B7   drag the title to move   \u00B7   pauses itself in co-op",
+                Theme.Body, 16f, Theme.TextFaint, TextAlignmentOptions.Center)
             .rectTransform.Place(0f, 10f, Width, 32f);
     }
 
@@ -348,9 +357,9 @@ internal sealed class DirectorPanel : MonoBehaviour
         if (!Plugin.MasterEnabled.Value)
             SetStatus(Theme.Off, "Director switched off");
         else if (solo)
-            SetStatus(Theme.Active, $"{session}  ·  effects active");
+            SetStatus(Theme.Active, $"{session}  \u00B7  effects active");
         else
-            SetStatus(Theme.Paused, $"Paused  ·  {session}");
+            SetStatus(Theme.Paused, $"Paused  \u00B7  {session}");
         _master.Set(Plugin.MasterEnabled.Value);
 
         foreach (var binding in _bindings)
@@ -396,8 +405,8 @@ internal sealed class DirectorPanel : MonoBehaviour
         if (stats == null)
             return "Not on the field right now.";
 
-        return $"HP {stats.currentHP}/{stats.maxHP}   ·   AP {stats.remainingActionPoints}/{stats.maxActionPoints}   ·   "
-            + $"Move {stats.remainingMoveDistance:0.#}/{stats.maxMoveDistance:0.#}   ·   Ult {stats.currentUltimateCharge}/{stats.maxUltimateCharge}";
+        return $"HP {stats.currentHP}/{stats.maxHP}   \u00B7   AP {stats.remainingActionPoints}/{stats.maxActionPoints}   \u00B7   "
+            + $"Move {stats.remainingMoveDistance:0.#}/{stats.maxMoveDistance:0.#}   \u00B7   Ult {stats.currentUltimateCharge}/{stats.maxUltimateCharge}";
     }
 
     // ---------------------------------------------------------------- window handling
@@ -424,6 +433,26 @@ internal sealed class DirectorPanel : MonoBehaviour
             Plugin.PanelY.Value = Mathf.Round(-_panel.anchoredPosition.y);
             Plugin.Instance.Config.Save();
         }
+    }
+
+    private void TrackPointer()
+    {
+        if (!_visible || _panel == null)
+        {
+            PointerCaptured = _pressOnPanel = false;
+            return;
+        }
+
+        var over = RectTransformUtility.RectangleContainsScreenPoint(_panel, Input.mousePosition, null);
+        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+            _pressOnPanel = over;
+        if (_pressOnPanel && !Input.GetMouseButton(0) && !Input.GetMouseButton(1))
+        {
+            _pressOnPanel = false;
+            _releasedFrame = Time.frameCount;
+        }
+
+        PointerCaptured = over || _pressOnPanel || Time.frameCount - _releasedFrame <= 2;
     }
 
     private bool OverHeader(Vector2 mouse)

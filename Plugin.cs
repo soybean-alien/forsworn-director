@@ -242,6 +242,21 @@ public sealed class Plugin : BasePlugin
 
         // PlayerProgressionData.AddExperiencePoints(owner, amount) feeds HeroProgressionData, so patch only this one.
         Patch(typeof(PlayerProgressionData), "AddExperiencePoints", prefix: nameof(BeforeExperienceAward));
+
+        // Clicks on the panel must not walk the party or pick combat targets underneath it.
+        Patch(typeof(FreeRoamSystem), "MoveToWaypoint", prefix: nameof(BeforeWorldClick));
+        Patch(typeof(CoreActionSystem), "HandleAbilityDecisionMade", prefix: nameof(BeforeAbilityDecision));
+    }
+
+    public static bool BeforeWorldClick() => !DirectorPanel.PointerCaptured;
+
+    public static bool BeforeAbilityDecision(ref bool __result)
+    {
+        if (!DirectorPanel.PointerCaptured)
+            return true;
+
+        __result = false;
+        return false;
     }
 
     private void Patch(Type type, string name, string prefix = null, string postfix = null)

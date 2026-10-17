@@ -1,4 +1,4 @@
-// Forsworn Director by soybean_alien
+﻿// Forsworn Director by soybean_alien
 // Licensed under the MIT License.
 
 using System;
@@ -12,7 +12,7 @@ namespace ForswornDirector.Ui;
 // mod ships no game assets; fonts are the game's own Cinzel/Cormorant TMP assets, looked up by name.
 internal static class Theme
 {
-    internal static readonly Color Backdrop = Rgba(0x0B0C10, 0.94f);
+    internal static readonly Color Backdrop = Rgba(0x0B0C10, 1f);
     internal static readonly Color Surface = Rgba(0x15171D, 0.96f);
     internal static readonly Color SurfaceRaised = Rgba(0x1D2028, 1f);
     internal static readonly Color Gold = Rgba(0xD8B46A, 1f);

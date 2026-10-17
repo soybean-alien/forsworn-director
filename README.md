@@ -1,28 +1,42 @@
 # Forsworn Director
 
-An offline/single-player BepInEx IL2CPP plugin for Forsworn. Press **F8** to open the control panel; use **F7/F9** to move between its global settings and individual class pages. Individual cheats default to off. The plugin pauses all effects unless FishNet reports an offline game or a host with no remote clients.
+A solo/offline toolkit for **Forsworn**, built as a BepInEx 6 IL2CPP plugin. Press **F8** in game to open the Director panel. It's a gold-trimmed overlay set in the game's own Cinzel and Cormorant fonts, so it looks like part of Forsworn's UI.
 
-## Controls
+Every effect pauses itself automatically unless the game is offline or you are a solo host with no other players connected. It never touches co-op sessions, Steam inventory or real money.
 
-- For every class name exposed by the game: god mode, health at class maximum, action points at class maximum, movement at class maximum, and ultimate charge at class maximum.
-- Damage and armor bonus modifiers have no game-enforced maximum in the inspected build, so the mod does not invent one for those stats.
-- Unlimited local Gold and Soul Shards. Each local balance is topped up to 999,999 while its toggle is on.
-- Unlimited talent points. Talent node rank limits still come from the game.
-- Mega XP: multiplies XP when the game's progression method awards it. The config allows 2x–5,000x. For this installation, the multiplier is set to 5,000x. XP is not generated while idle, and the game's level cap remains in effect.
-- The inspected gameplay code has no bag-capacity or carry-weight limit to remove. Soul Shards are local currency; no separate premium wallet was found. The mod does not alter Steam inventory, Steam wallet, or real-money transactions.
+## What it does
+
+**Party page**
+- **Unlimited Gold:** every purse in the party stays at 999,999.
+- **Unlimited Soul Shards:** the run's Soul Shard reserve stays at 999,999.
+- **Unlimited Talent Points:** buy any talent node. Rank limits still come from the game.
+- **Mega Battle XP:** XP awarded by the game is multiplied. One-click presets are x2, x10, x100, x1,000 and x5,000; the config accepts any value from 2 to 5,000. Nothing is generated while idle, and the level cap still applies.
+- **Empower every hero / Restore normal rules:** turn every class toggle on or off at once.
+
+**One page per class** (Assassin, Knight, Monk, Paladin, Panther, Ranger, Wizard)
+- God Mode, Health Always Full, Endless Action Points, Endless Movement, Ultimate Always Ready.
+- A live readout of that hero's HP, AP, movement and ultimate charge while they're on the field, plus **All on / All off** buttons.
+
+The status line under the title shows whether effects are active (green), paused and why (amber), or switched off. Drag the title to move the panel; its position is remembered.
 
 ## Install
 
-1. Use a working BepInEx 6 IL2CPP x64 installation for the game's Unity 2022.3.62f3 build.
-2. Copy `release/ForswornDirector.dll` to `Forsworn/BepInEx/plugins/`.
-3. Start an offline single-player game and press **F8**. Settings are saved in `BepInEx/config/net.codex.forsworn.director.cfg`.
+1. Install [BepInEx 6 IL2CPP x64](https://builds.bepinex.dev/projects/bepinex_be) (build 789 or newer) into the Forsworn folder and launch the game once so it generates interop assemblies.
+2. Copy `ForswornDirector.dll` to `Forsworn/BepInEx/plugins/`.
+3. Start a single-player run and press **F8**.
 
-**Runtime status:** BepInEx 6.0.0-be.789 previously loaded the plugin with seven class profiles. Version 0.1.2 includes the paged controls, solo-host detection fix, and a 5,000x battle-earned XP multiplier cap. It is installed, and this game's config has Mega Battle XP enabled with `BattleXPMultiplier = 5000`. The change takes effect on the next launch; runtime XP gain has not yet been checked.
+Settings live in `BepInEx/config/soybean_alien.forsworn.director.cfg`. Settings from v0.1.x (`net.codex.forsworn.director.cfg`) are migrated automatically on first launch.
 
 ## Build from source
 
-`ForswornDirector.csproj` references the BepInEx core and generated game interop assemblies in the sibling `_modlab/game-copy/BepInEx` folder. Build after that folder contains valid `interop` assemblies:
+The project references BepInEx core and the game's generated interop assemblies from `..\BepInEx` (the game folder). Override `BepInExDir` if yours lives elsewhere:
 
 ```powershell
-dotnet build ForswornDirector.csproj -c Release -o release
+dotnet build ForswornDirector.csproj -c Release -o build\out -p:BepInExDir='D:\SteamLibrary\steamapps\common\Forsworn\BepInEx'
 ```
+
+## Credits and AI disclosure
+- Made by **soybean_alien**. Licensed under the **MIT License** (see [LICENSE](LICENSE)).
+- [BepInEx](https://github.com/BepInEx/BepInEx) and [HarmonyX](https://github.com/BepInEx/HarmonyX). Forsworn Director is a BepInEx 6 IL2CPP plugin.
+- Forsworn © Resummon Studios. Forsworn Director is an unofficial fan project and isn't affiliated with Resummon Studios.
+- **AI disclosure:** Forsworn Director was designed with and written by **Claude Code (Anthropic, Claude Opus 5.5)**, building on an earlier prototype by OpenAI Codex, directed by the author, using the universal-modder toolkit. The panel, session detection, and the per-class stat toggles were tested in the real game on a solo run. Gold, talent and XP effects are wired to the same hooks but were not yet observed in combat or shops.
