@@ -11,12 +11,14 @@ Every effect pauses itself automatically unless the game is offline or you are a
 **Party page**
 - **Unlimited Gold:** every purse in the party stays at 999,999.
 - **Unlimited Soul Shards:** the run's Soul Shard reserve stays at 999,999.
+- **Unlimited Upgrade Tokens:** every hero's Upgrade Tokens stay at 999,999.
 - **Unlimited Talent Points:** buy any talent node. Rank limits still come from the game.
 - **Mega Battle XP:** XP awarded by the game is multiplied. One-click presets are x2, x10, x100, x1,000 and x5,000; the config accepts any value from 2 to 5,000. Nothing is generated while idle, and the level cap still applies.
 - **Empower every hero / Restore normal rules:** turn every class toggle on or off at once.
 
 **One page per class** (Assassin, Knight, Monk, Paladin, Panther, Ranger, Wizard)
 - God Mode, Health Always Full, Endless Action Points, Endless Movement, Ultimate Always Ready.
+- **Stat boosts:** eight separate +20 toggles for Damage, Shield Generation, AP Generation, Armor, Ultimate Generation, Movement, Thorns and Max Health. They're added through the game's own bonus system, so they appear in the hero's stat breakdown as "Forsworn Director" and come off cleanly when switched off.
 - A live readout of that hero's HP, AP, movement and ultimate charge while they're on the field, plus **All on / All off** buttons.
 
 The status line under the title shows whether effects are active (green), paused and why (amber), or switched off. Drag the title to move the panel; its position is remembered.

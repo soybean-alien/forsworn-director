@@ -41,6 +41,7 @@ internal sealed class DirectorPanel : MonoBehaviour
     private bool _visible;
     private int _page;
     private float _nextRefresh;
+    private float _nextTick;
     private bool _dragging;
     private Vector2 _dragOffset;
 
@@ -62,6 +63,12 @@ internal sealed class DirectorPanel : MonoBehaviour
             SetVisible(!_visible);
 
         TrackPointer();
+        if (Time.unscaledTime >= _nextTick)
+        {
+            _nextTick = Time.unscaledTime + 0.5f;
+            Plugin.Tick();
+        }
+
         if (!_visible || _panel == null)
             return;
 
@@ -219,6 +226,7 @@ internal sealed class DirectorPanel : MonoBehaviour
         y = Section(y, "Treasury");
         y = Row(y, "Unlimited Gold", "Every purse in the party stays at 999,999.", Plugin.InfiniteGold);
         y = Row(y, "Unlimited Soul Shards", "The run's Soul Shard reserve stays at 999,999.", Plugin.InfiniteSoulShards);
+        y = Row(y, "Unlimited Upgrade Tokens", "Every hero's Upgrade Tokens stay at 999,999.", Plugin.InfiniteUpgradeTokens);
 
         y = Section(y + 8f, "Progression");
         y = Row(y, "Unlimited Talent Points", "Buy any talent node. Rank limits still apply.", Plugin.UnlimitedTalentPoints);
@@ -252,7 +260,17 @@ internal sealed class DirectorPanel : MonoBehaviour
         y = Row(y, "Endless Action Points", "Action points stay at the class maximum.", settings.MaxActionPoints);
         y = Row(y, "Endless Movement", "Movement stays at the class maximum.", settings.MaxMovement);
         y = Row(y, "Ultimate Always Ready", "Ultimate charge never drains.", settings.MaxUltimate);
-        return y;
+
+        y = Section(y + 8f, $"Stat boosts   +{Boosts.Amount}");
+        const float gap = 10f;
+        var cell = (Inner - gap) / 2f;
+        for (var index = 0; index < Boosts.Stats.Length; index++)
+        {
+            var (key, label, _) = Boosts.Stats[index];
+            BoostCell(index % 2 * (cell + gap), y + index / 2 * 46f, cell, label, settings.Boosts[key]);
+        }
+
+        return y + (Boosts.Stats.Length + 1) / 2 * 46f;
     }
 
     private float Section(float y, string title)
@@ -272,6 +290,16 @@ internal sealed class DirectorPanel : MonoBehaviour
         Widgets.Text(row, "Description", description, Theme.Body, 17f, Theme.TextDim).rectTransform.Place(10f, 31f, Inner - 80f, 22f);
         _bindings.Add((new Switch(row, Inner + 10f - 48f, 17f, entry.Value), entry));
         return y + height;
+    }
+
+    private void BoostCell(float x, float y, float width, string label, ConfigEntry<bool> entry)
+    {
+        var cell = Widgets.Rect("Boost:" + label, _content).Place(x, y, width, 40f);
+        Widgets.Image(cell, "Fill", Theme.Card, Theme.Surface).rectTransform.Fill();
+        Widgets.Image(cell, "Ring", Theme.CardRing, Theme.WithAlpha(Theme.Gold, 0.14f)).rectTransform.Fill();
+        Widgets.Clickable(cell, () => Flip(entry), 0.06f);
+        Widgets.Text(cell, "Label", label, Theme.Heading, 14f, Theme.Text, spacing: 0.5f).rectTransform.Place(14f, 8f, width - 80f, 24f);
+        _bindings.Add((new Switch(cell, width - 60f, 8f, entry.Value), entry));
     }
 
     private float XpChips(float y)
