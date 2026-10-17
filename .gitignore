@@ -6,3 +6,4 @@ pending-*/
 build.log
 CODEX_HANDOFF.md
 AGENTS.md
+.claude/mirror-backup.log

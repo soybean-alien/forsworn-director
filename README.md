@@ -2,6 +2,8 @@
 
 A solo/offline toolkit for **Forsworn**, built as a BepInEx 6 IL2CPP plugin. Press **F8** in game to open the Director panel. It's a gold-trimmed overlay set in the game's own Cinzel and Cormorant fonts, so it looks like part of Forsworn's UI.
 
+![Forsworn Director panel in game](docs/panel.png)
+
 Every effect pauses itself automatically unless the game is offline or you are a solo host with no other players connected. It never touches co-op sessions, Steam inventory or real money.
 
 ## What it does
