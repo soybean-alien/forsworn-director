@@ -165,26 +165,88 @@ public sealed class Plugin : BasePlugin
 
     internal static void ApplyStats(MechanicStats stats, CharacterClass owner = null)
     {
-        if (!EffectsEnabled || stats == null)
+        if (!EffectsEnabled || stats == null || owner == null)
             return;
 
-        var settings = For(owner ?? stats.characterClass);
-        if (settings == null)
+        // Use the class passed by the caller. Reading stats.characterClass here can race
+        // IL2CPP scene initialization, before that native field is safe to dereference.
+        var entry = Register(stats, owner);
+        if (entry == null)
             return;
 
+        var settings = entry.Settings;
         if (settings.MaxHealth.Value)
             stats.currentHP = stats.maxHP;
         if (settings.MaxActionPoints.Value)
-            stats.SetRemainingAP(stats.maxActionPoints);
+            stats.SetRemainingAP(entry.MaxActionPoints);
         if (settings.MaxMovement.Value)
-            stats.SetRemainingMovement(stats.maxMoveDistance, true);
+            stats.SetRemainingMovement(entry.MaxMoveDistance, true);
         if (settings.MaxUltimate.Value)
             stats.currentUltimateCharge = stats.maxUltimateCharge;
+    }
+
+    // Hero registry, keyed by the native MechanicStats pointer. The stat hooks run while FishNet
+    // is still loading scenes, when MechanicStats.characterClass can point at an object that isn't
+    // readable yet (AccessViolation in get_characterClass, Act 1 transition). So hooks never touch
+    // characterClass: heroes are resolved here at safe moments (round setup, the 0.5 s tick, panel
+    // actions) and the hooks only look up their own pointer.
+    private sealed class HeroEntry
+    {
+        internal ClassSettings Settings;
+        internal int MaxActionPoints;
+        internal float MaxMoveDistance;
+    }
+
+    private static readonly Dictionary<IntPtr, HeroEntry> HeroesByStats = new();
+
+    private static HeroEntry Register(MechanicStats stats, CharacterClass owner)
+    {
+        var pointer = stats != null ? stats.Pointer : IntPtr.Zero;
+        if (pointer == IntPtr.Zero)
+            return null;
+
+        var settings = For(owner);
+        if (settings == null)
+        {
+            HeroesByStats.Remove(pointer);
+            return null;
+        }
+
+        var entry = new HeroEntry { Settings = settings, MaxActionPoints = stats.maxActionPoints, MaxMoveDistance = stats.maxMoveDistance };
+        HeroesByStats[pointer] = entry;
+        return entry;
+    }
+
+    private static ClassSettings Lookup(MechanicStats stats, out HeroEntry entry)
+    {
+        entry = null;
+        return EffectsEnabled && stats != null && HeroesByStats.TryGetValue(stats.Pointer, out entry) ? entry.Settings : null;
+    }
+
+    private static ClassSettings Lookup(MechanicStats stats) => Lookup(stats, out _);
+
+    // Rebuilt from scratch so pointers of destroyed heroes can't be inherited by new objects for long.
+    private static void RefreshHeroRegistry()
+    {
+        HeroesByStats.Clear();
+        try
+        {
+            foreach (var character in UnityEngine.Object.FindObjectsOfType<CoreCharacter>())
+            {
+                if (character != null)
+                    Register(character.mechanicStats, character.characterClass);
+            }
+        }
+        catch (Exception exception)
+        {
+            Instance?.Log.LogWarning($"Could not refresh hero registry: {exception.Message}");
+        }
     }
 
     // Called a few times a second by the panel component, open or not.
     internal static void Tick()
     {
+        RefreshHeroRegistry();
         Boosts.Tick();
         UpgradeTokens.Tick();
     }
@@ -311,7 +373,7 @@ public sealed class Plugin : BasePlugin
 
     public static bool BeforeReceiveDamage(MechanicStats __instance, ref bool __result)
     {
-        var settings = EffectsEnabled ? For(__instance?.characterClass) : null;
+        var settings = Lookup(__instance);
         if (settings == null || !settings.GodMode.Value)
             return true;
 
@@ -323,7 +385,7 @@ public sealed class Plugin : BasePlugin
 
     public static void AfterReceiveDamage(MechanicStats __instance, ref bool __result)
     {
-        var settings = EffectsEnabled ? For(__instance?.characterClass) : null;
+        var settings = Lookup(__instance);
         if (settings == null || (!settings.GodMode.Value && !settings.MaxHealth.Value))
             return;
 
@@ -334,40 +396,41 @@ public sealed class Plugin : BasePlugin
 
     public static bool BeforeReceiveEventDamage(MechanicStats __instance)
     {
-        var settings = EffectsEnabled ? For(__instance?.characterClass) : null;
+        var settings = Lookup(__instance);
         return settings == null || !settings.GodMode.Value;
     }
 
     public static void AfterReceiveEventDamage(MechanicStats __instance)
     {
-        var settings = EffectsEnabled ? For(__instance?.characterClass) : null;
+        var settings = Lookup(__instance);
         if (settings != null && (settings.GodMode.Value || settings.MaxHealth.Value))
             __instance.currentHP = __instance.maxHP;
     }
 
     public static bool BeforeSetDeathStats(MechanicStats __instance)
     {
-        var settings = EffectsEnabled ? For(__instance?.characterClass) : null;
+        var settings = Lookup(__instance);
         return settings == null || (!settings.GodMode.Value && !settings.MaxHealth.Value);
     }
 
     public static void BeforeSetRemainingAP(MechanicStats __instance, ref int amount)
     {
-        var settings = EffectsEnabled ? For(__instance?.characterClass) : null;
+        // Runs during scene loading: use the limit cached by Register, never native fields.
+        var settings = Lookup(__instance, out var entry);
         if (settings != null && settings.MaxActionPoints.Value)
-            amount = __instance.maxActionPoints;
+            amount = entry.MaxActionPoints;
     }
 
     public static void BeforeSetRemainingMovement(MechanicStats __instance, ref float amount)
     {
-        var settings = EffectsEnabled ? For(__instance?.characterClass) : null;
+        var settings = Lookup(__instance, out var entry);
         if (settings != null && settings.MaxMovement.Value)
-            amount = __instance.maxMoveDistance;
+            amount = entry.MaxMoveDistance;
     }
 
     public static void BeforeConsumeUltimate(MechanicStats __instance, ref int percentage)
     {
-        var settings = EffectsEnabled ? For(__instance?.characterClass) : null;
+        var settings = Lookup(__instance);
         if (settings != null && settings.MaxUltimate.Value)
             percentage = 0;
     }
