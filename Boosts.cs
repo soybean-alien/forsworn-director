@@ -29,15 +29,34 @@ internal static class Boosts
 
     private static bool _warned;
 
+    // Last synced boost mask per BonusStats pointer. Walking the contributions dictionary costs
+    // several IL2CPP calls per stat, so heroes are only re-synced when their wanted set changes,
+    // plus a full check every 10 ticks to catch bonus objects the game rebuilt.
+    private static readonly Dictionary<IntPtr, int> Synced = new();
+    private static int _tick;
+
     internal static void Tick()
     {
         try
         {
-            foreach (var character in UnityEngine.Object.FindObjectsOfType<CoreCharacter>())
+            var verify = ++_tick % 10 == 0;
+            if (Synced.Count > 64)
+                Synced.Clear();
+
+            foreach (var character in Plugin.Heroes)
             {
-                var settings = character != null ? Plugin.For(character.characterClass) : null;
-                if (settings != null)
-                    Sync(character.mechanicStats, settings);
+                var stats = character != null ? character.mechanicStats : null;
+                var settings = stats != null ? Plugin.For(character.characterClass) : null;
+                var bonus = settings != null ? stats.bonusStats : null;
+                if (bonus == null)
+                    continue;
+
+                var wanted = Wanted(settings);
+                if (!verify && Synced.TryGetValue(bonus.Pointer, out var last) && last == wanted)
+                    continue;
+
+                Sync(stats, settings);
+                Synced[bonus.Pointer] = wanted;
             }
         }
         catch (Exception exception)
@@ -46,6 +65,21 @@ internal static class Boosts
                 Plugin.Instance.Log.LogWarning($"Stat boost sync failed: {exception}");
             _warned = true;
         }
+    }
+
+    private static int Wanted(ClassSettings settings)
+    {
+        if (!Plugin.EffectsEnabled)
+            return 0;
+
+        var mask = 0;
+        for (var index = 0; index < Stats.Length; index++)
+        {
+            if (settings.Boosts[Stats[index].Key].Value)
+                mask |= 1 << index;
+        }
+
+        return mask;
     }
 
     private static void Sync(MechanicStats stats, ClassSettings settings)
@@ -109,10 +143,10 @@ internal static class UpgradeTokens
         try
         {
             // Run balance: CharacterClass.Metadata.extraUpgradeTokens (saved as HeroSaveData.upgradeTokenCount).
-            foreach (var character in UnityEngine.Object.FindObjectsOfType<CoreCharacter>())
+            foreach (var character in Plugin.Heroes)
             {
                 var characterClass = character != null ? character.characterClass : null;
-                if (characterClass == null || !characterClass.IsHero() || characterClass.metadata == null)
+                if (characterClass == null || characterClass.metadata == null)
                     continue;
 
                 var current = characterClass.metadata.extraUpgradeTokens;

@@ -101,7 +101,11 @@ public sealed class Plugin : BasePlugin
 
     internal static int XpMultiplier => Math.Max(2, Math.Min(5000, BattleXPMultiplier.Value));
 
-    internal static bool EffectsEnabled => MasterEnabled != null && MasterEnabled.Value && IsSoloSession();
+    // Cached once per frame by the panel component. The stat hooks fire very often in battle
+    // (AI move evaluation), and re-running the FishNet session check per call made fights sluggish.
+    internal static bool EffectsEnabled { get; private set; }
+
+    internal static void RefreshSession() => EffectsEnabled = MasterEnabled != null && MasterEnabled.Value && IsSoloSession();
 
     internal static bool IsSoloSession() => TryGetSoloSession(out _);
 
@@ -226,15 +230,19 @@ public sealed class Plugin : BasePlugin
     private static ClassSettings Lookup(MechanicStats stats) => Lookup(stats, out _);
 
     // Rebuilt from scratch so pointers of destroyed heroes can't be inherited by new objects for long.
+    // Heroes found by the last tick: one scene scan shared by the registry, boosts, tokens and readout.
+    internal static readonly List<CoreCharacter> Heroes = new();
+
     private static void RefreshHeroRegistry()
     {
         HeroesByStats.Clear();
+        Heroes.Clear();
         try
         {
             foreach (var character in UnityEngine.Object.FindObjectsOfType<CoreCharacter>())
             {
-                if (character != null)
-                    Register(character.mechanicStats, character.characterClass);
+                if (character != null && Register(character.mechanicStats, character.characterClass) != null)
+                    Heroes.Add(character);
             }
         }
         catch (Exception exception)
@@ -253,13 +261,14 @@ public sealed class Plugin : BasePlugin
 
     internal static void ApplyLoadedHeroes()
     {
+        RefreshSession();
         Tick();
         if (!EffectsEnabled)
             return;
 
         try
         {
-            foreach (var character in UnityEngine.Object.FindObjectsOfType<CoreCharacter>())
+            foreach (var character in Heroes)
             {
                 if (character != null)
                     ApplyStats(character.mechanicStats, character.characterClass);
@@ -275,7 +284,7 @@ public sealed class Plugin : BasePlugin
     {
         try
         {
-            foreach (var character in UnityEngine.Object.FindObjectsOfType<CoreCharacter>())
+            foreach (var character in Heroes)
             {
                 var characterClass = character != null ? character.characterClass : null;
                 if (characterClass != null && characterClass.IsHero()

@@ -62,10 +62,11 @@ internal sealed class DirectorPanel : MonoBehaviour
         if (Input.GetKeyDown(Plugin.ToggleKey.Value))
             SetVisible(!_visible);
 
+        Plugin.RefreshSession();
         TrackPointer();
         if (Time.unscaledTime >= _nextTick)
         {
-            _nextTick = Time.unscaledTime + 0.5f;
+            _nextTick = Time.unscaledTime + 1f;
             Plugin.Tick();
         }
 
